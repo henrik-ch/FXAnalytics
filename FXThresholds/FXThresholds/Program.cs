@@ -55,8 +55,38 @@ namespace FXThresholds
             var json = JsonConvert.SerializeObject(fxResults, Formatting.Indented);
             File.WriteAllText("fxresults.json", json);
 
+            List<Tuple<FXUpdate, FXCalcs.MarketStepReturn>> packedList = packList(fxUpdates, fxResults);
+
+            var filteredpackedlist = packedList.Where(x => x.Item2.eventText != "NO EVENT").ToList();
+
+            foreach (var item in filteredpackedlist)
+            {
+                Console.WriteLine("time: {0} mid: {1} event: {2}", item.Item1.timestamp.ToString(), item.Item1.ratemid.ToString(), item.Item2.eventText);
+            }
+
             System.Console.WriteLine("Stopping here...");
 
+        }
+
+
+        public static List<Tuple<FXUpdate,FXCalcs.MarketStepReturn>> packList(List<FXUpdate> firstList, List<FXCalcs.MarketStepReturn> secList)
+        {
+
+            var retList = new List<Tuple<FXUpdate,FXCalcs.MarketStepReturn>>();
+            //fail with empty list if different length
+            if(firstList.Count != secList.Count) 
+            {
+                return retList;
+            }
+            else
+            {
+                for (System.Int32 listCounter = 0; listCounter < firstList.Count; listCounter += 1)
+                {
+                    retList.Add(new Tuple<FXUpdate,FXCalcs.MarketStepReturn>(firstList[listCounter],secList[listCounter]));
+                }
+                return retList;
+            }
+                
         }
 
         static void readfxCsv(List<FXUpdate> inList)
